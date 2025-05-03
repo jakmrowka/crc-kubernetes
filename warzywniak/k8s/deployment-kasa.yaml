@@ -15,6 +15,7 @@ spec:
       containers:
       - name: app-insert
         image: gadzina13/warzywniak-insert:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         volumeMounts:

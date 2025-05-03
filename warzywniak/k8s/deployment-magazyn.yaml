@@ -15,6 +15,7 @@ spec:
       containers:
       - name: app-list
         image: gadzina13/warzywniak-list:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         volumeMounts:

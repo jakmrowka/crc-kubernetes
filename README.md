@@ -115,13 +115,72 @@ Z uwagi na to, że chcemy zapisywać pewne rzeczy to wybieramy `ReadWriteMany`. 
           readOnly: true
 ```
 To `readOnly: true` załatwi sprawę.
+Także mamy jedno miejsce gdzie jest baza danych i mozemy z wielu podów tam zapisywać jak i odczytywać.
 
+## Single Pod - stateless
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f warzywniak/k8s-singlepod/deployment-warzywniak.yaml
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f warzywniak/k8s-singlepod/service-warzywniak.yaml
 ```
+Tutaj mamy skompresowane do 1 Poda w którym siedzi zarówno zapis jak i odczyt. Ale jeżeli pod się wywróci tracimy dane. Do tego każda baza żyje swoim życiem w przypadku replik>1. Nie ma synchronizacji.
 
+## Statefull
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f warzywniak/k8s-statefull/warzywniak-statefulset.yaml
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f warzywniak/k8s-statefull/service-warzywniak.yaml
+```
+Tutaj mamy to samo co w Single pod, ale mamy tworzenie automatycznego PVC, ale każdy pod ma własny PVC. Jakie są róznice względem deplyoment + PVC:
+* Nazewnictwo:
+  * Deployment ma losowe: `app-gjdfngfnh` 
+  * StatefulSet ma narastajace: `app-0`
+* PVC:
+  * Deployment: robimy manualnie
+  * StatefulSet: automatycznie przez `volumeClaimTemplates`
+* Użycie PV:
+  * Deployment: sharuje jeden na wszystkie
+  * StatefulSet: osobny per pod
+* volumeClaimTemplates:
+  * Deployment: zmieniasz jak chcesz
+  * StatefulSet: Nie możesz zmienić po utworzeniu StatefulSeta
+* usuwanie danych(wartości defaultowe):
+  * Deployment: `ReclcaimPolicy: Retain` nawet jak usuniesz PV to dane zostają, trzeba manualnie usunąć dane
+  * StatefulSet: `ReclcaimPolicy: Delete` dane giną po usunięciu PVC
+
+# Helm
+zarządzanie deplyomentem:
+```bash
+kubectl apply -f warzywniak/k8s/ --kubeconfig=./student0-kubeconfig.yaml
+```
+```bash
+kubectl delete -f warzywniak/k8s/ --kubeconfig=./student0-kubeconfig.yaml
+```
+W taki sposób możemy tworzyc i usuwać "złożone" wdrożenia, ale:
+* jeżeli mamy cokolwiek zmienić np port to trzeba wiedzieć gdzie to zmienić
+* jeżeli chcesz powielić to samo ale np na innyp adresie to musisz zmieniać metadata
+* dodać zależności
+To trzeba się sporo napracować, albo można użyć Helm i problemy powyższe zostaną rozwiązane przez:
+* `values.yaml`
+* `helm install NAZWA` poprzez `{{ .Release.Name }}`
+* `dependencies`
+
+Budujemy obraz
+```bash
+docker build -t gadzina13/frontend-secret-viewer:latest ./helm/src
+```
+Instalujemy
+```bash
+helm install viewer ./helm/helm-secret-viewer --kubeconfig=./student0-kubeconfig.yaml
+```
+Odinstalowujemy
+```bash
+helm uninstall viewer --kubeconfig=./student0-kubeconfig.yaml
+```
+Zmieniamy
+```bash
+helm upgrade viewer ./helm/helm-secret-viewer --kubeconfig=./student0-kubeconfig.yaml
+```
+
+# Cron
+```bash
+kubectl apply -f ./crony/cron.yaml --kubeconfig=./student0-kubeconfig.yaml
 ```

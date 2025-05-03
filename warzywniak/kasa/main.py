@@ -18,7 +18,12 @@ def add_fruit(fruit: str, amount: int):
     conn.execute("INSERT INTO fruits(name, amount) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET amount=amount+?", (fruit, amount, amount))
     conn.commit()
     conn.close()
-    return {"status": "added", "fruit": fruit, "amount": amount}
+    return {
+        "status": "added",
+        "fruit": fruit,
+        "amount": amount,
+        "pod": pod_name
+    }
 
 @app.get("/subtract/{fruit}/{amount}")
 def subtract_fruit(fruit: str, amount: int):
@@ -26,4 +31,9 @@ def subtract_fruit(fruit: str, amount: int):
     conn.execute("UPDATE fruits SET amount = amount - ? WHERE name = ?", (amount, fruit))
     conn.commit()
     conn.close()
-    return {"status": "subtracted", "fruit": fruit, "amount": amount}
+    return {
+        "status": "subtracted",
+        "fruit": fruit,
+        "amount": amount,
+        "pod": pod_name
+    }

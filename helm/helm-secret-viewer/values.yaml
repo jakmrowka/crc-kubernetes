@@ -1,0 +1,33 @@
+frontend:
+  image: gadzina13/frontend-secret-viewer:latest
+  port: 8000
+  nodePort: 30087
+
+  resources:
+    limits:
+      cpu: "50m"
+      memory: "100Mi"
+    requests:
+      cpu: "20m"
+      memory: "64Mi"
+
+config:
+  ENV_NAME: "dev"
+  LOCATION: "limanowa"
+  VERSION: "1.0"
+
+secret:
+  DB_PASSWORD: "tajnehaslo123"
+
+postgres:
+  image: postgres:17.4
+  db: myapp
+  user: user
+
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "200Mi"
+    requests:
+      cpu: "50m"
+      memory: "100Mi"

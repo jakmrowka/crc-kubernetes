@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: print-time-job
+spec:
+  schedule: "15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: time-printer
+            image: busybox
+            command: ["sh", "-c", "echo Godzina: $(date +%H:%M:%S)"]
+            resources:
+              limits:
+                cpu: "50m"
+                memory: "64Mi"
+          restartPolicy: OnFailure
