@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-insert
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-insert
+  template:
+    metadata:
+      labels:
+        app: app-insert
+    spec:
+      containers:
+      - name: app-insert
+        image: gadzina13/warzywniak-insert:v1
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: "/data"
+          name: fruits-storage
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "64Mi"
+      volumes:
+      - name: fruits-storage
+        persistentVolumeClaim:
+          claimName: fruits-pvc

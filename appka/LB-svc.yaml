@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: crc-simple-api-lb
+  namespace: student0
+spec:
+  type: LoadBalancer
+  selector:
+    app: crc-simple-api
+  ports:
+    - port: 80
+      targetPort: 9000

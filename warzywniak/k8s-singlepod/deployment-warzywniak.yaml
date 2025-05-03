@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warzywniak-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: warzywniak
+  template:
+    metadata:
+      labels:
+        app: warzywniak
+    spec:
+      containers:
+      - name: insert-container
+        image: gadzina13/warzywniak-insert:v1
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: "/data"
+          name: shared-storage
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "64Mi"
+
+      - name: list-container
+        image: gadzina13/warzywniak-list:v1
+        ports:
+        - containerPort: 8001
+        command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+        volumeMounts:
+        - mountPath: "/data"
+          name: shared-storage
+          readOnly: true
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "64Mi"
+
+      volumes:
+      - name: shared-storage
+        emptyDir: {}

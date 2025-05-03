@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: simple-nginx-rs
+  labels:
+    app: nginx
+    glupialabelka: nginx3
+  namespace: student0
+spec:
+  selector:
+    matchExpressions:
+      - key: glupialabelka
+        operator: In
+        values:
+          - nginx1
+          - nginx2
+          - nginx3
+          - nginx4
+  replicas: 3
+  template:
+    metadata:
+      name: simple-nginx-rs
+      labels:
+        app: nginx
+        glupialabelka: nginx3
+      namespace: student0
+    spec:
+      containers:
+        - name: mojnginx-rs
+          image: nginx
+          resources:
+            limits:
+              cpu: "50m"
+              memory: "128Mi"
+            requests:
+              cpu: "20m"
+              memory: "64Mi"

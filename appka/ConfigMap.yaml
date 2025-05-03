@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-config
+  namespace: student0
+data:
+  config_var: "To jest wartość z ConfigMap"

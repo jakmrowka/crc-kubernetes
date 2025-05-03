@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-nginx-deployment
+  labels:
+    app: nginx
+    glupialabelka: nginx4
+  namespace: student0
+spec:
+  strategy:
+#    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      glupialabelka: nginx4
+  replicas: 3
+  template:
+    metadata:
+      name: simple-nginx-rs
+      labels:
+        app: nginx
+        glupialabelka: nginx4
+      namespace: student0
+    spec:
+      containers:
+        - name: mojnginx-rs
+          image: nginx:1.26-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "40m"
+              memory: "100Mi"
+            requests:
+              cpu: "20m"
+              memory: "64Mi"

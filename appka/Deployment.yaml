@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crc-simple-api
+  namespace: student0
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: crc-simple-api
+  template:
+    metadata:
+      labels:
+        app: crc-simple-api
+    spec:
+      containers:
+        - name: crc-simple-api
+          image: gadzina13/crc-simple-api:v1
+          ports:
+            - containerPort: 9000
+          env:
+            - name: MY_CONFIG_VAR
+              valueFrom:
+                configMapKeyRef:
+                  name: demo-config
+                  key: config_var
+            - name: MY_SECRET_VAR
+              valueFrom:
+                secretKeyRef:
+                  name: demo-secret
+                  key: secret_var
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/appconfig
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 9000
+            initialDelaySeconds: 15
+            failureThreshold: 30
+            periodSeconds: 2
+          resources:
+            limits:
+              cpu: "50m"
+              memory: "100Mi"
+            requests:
+              cpu: "20m"
+              memory: "64Mi"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: demo-config
+

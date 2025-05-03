@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-list
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-list
+  template:
+    metadata:
+      labels:
+        app: app-list
+    spec:
+      containers:
+      - name: app-list
+        image: gadzina13/warzywniak-list:v1
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: "/data"
+          name: fruits-storage
+          readOnly: true
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "64Mi"
+      volumes:
+      - name: fruits-storage
+        persistentVolumeClaim:
+          claimName: fruits-pvc

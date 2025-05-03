@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: simple-nginx-rc
+  labels:
+    app: nginx
+    glupialabelka: nginx3
+  namespace: student0
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: simple-nginx-rc
+      labels:
+        app: nginx
+        glupialabelka: nginx3
+      namespace: student0
+    spec:
+      containers:
+        - name: mojnginx-rc
+          image: nginx
+          resources:
+            limits:
+              cpu: "50m"
+              memory: "128Mi"
+            requests:
+              cpu: "20m"
+              memory: "64Mi"

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-nginx
+  labels:
+    app: nginx
+    glupialabelka: nginx1
+  namespace: student0
+spec:
+  containers:
+    - name: mojnginx
+      image: nginx
+      resources:
+        limits:
+          cpu: "100m"         # 0.1 vCPU
+          memory: "128Mi"     # 128 MiB RAM
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
