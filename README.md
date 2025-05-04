@@ -102,7 +102,7 @@ Warto zwrócić uwagę na:
   accessModes:
     - ReadWriteMany
 ```
-`storageClassName: manual` oznacza, że sami musimy się zatroszczyc o stworzenie zasobu. Możemy zostawić puste i wtedy zostanie domyślnie utworzony(na microk8s trzeba zrobić `microk8s enable hostpath-storage`)
+`storageClassName: manual` oznacza, że  tworzymy własną nazwe PV i sami musimy się zatroszczyc o stworzenie zasobu. Możemy zostawić puste i wtedy zostanie domyślnie utworzony(na microk8s trzeba zrobić `microk8s enable hostpath-storage`)
 
 `accessModes` mamy opcje: `ReadWriteOnce`, `ReadOnlyMany`, `ReadWriteMany` i od 1.29 `ReadWriteOncePod`
 
@@ -145,6 +145,14 @@ Tutaj mamy to samo co w Single pod, ale mamy tworzenie automatycznego PVC, ale k
 * usuwanie danych(wartości defaultowe):
   * Deployment: `ReclcaimPolicy: Retain` nawet jak usuniesz PV to dane zostają, trzeba manualnie usunąć dane
   * StatefulSet: `ReclcaimPolicy: Delete` dane giną po usunięciu PVC
+```bash
+kubectl apply -f warzywniak/k8s-statefull/svc-warzywniak-headless.yaml --kubeconfig=./student0-kubeconfig.yaml
+```
+
+
+```bash
+kubectl get pv -o wide --kubeconfig=./student0-kubeconfig.yaml
+```
 
 # Helm
 zarządzanie deplyomentem:
@@ -184,3 +192,80 @@ helm upgrade viewer ./helm/helm-secret-viewer --kubeconfig=./student0-kubeconfig
 ```bash
 kubectl apply -f ./crony/cron.yaml --kubeconfig=./student0-kubeconfig.yaml
 ```
+
+
+# 📊 Monitoring i Logowanie w Kubernetes – Porównanie Narzędzi (LGTM, ELK, Fluentd)
+
+## 🔍 Tabela porównawcza: Stacki LGTM, ELK i inne komponenty
+
+| Narzędzie          | Stack      | Typ narzędzia       | Co robi                                                       | Typowe użycie                     | Przykładowa integracja            | Uwaga                             |
+|--------------------|------------|----------------------|----------------------------------------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
+| **Loki**           | LGTM       | Przechowywanie logów | Indeksuje i przechowuje logi z etykietami (labels)             | Zbieranie logów z kontenerów      | Grafana, Promtail, Fluentd        | Lżejszy od Elasticsearch          |
+| **Promtail**       | LGTM       | Agent logów          | Odczytuje logi z kontenerów i przesyła do Loki                 | Każdy węzeł (DaemonSet)           | Loki                              | Minimalna konfiguracja            |
+| **Grafana**        | LGTM       | Frontend (GUI)       | Wizualizacja danych (metryki, logi, tracing, alerty)           | Dashboardy i eksploracja danych   | Prometheus, Loki, Tempo, InfluxDB | Jeden interfejs do wszystkiego   |
+| **Tempo**          | LGTM       | Tracing              | Zbieranie i przeszukiwanie śladów zapytań HTTP                 | Monitoring mikroserwisów          | Grafana, OpenTelemetry            | Alternatywa dla Jaeger/Zipkin    |
+| **Prometheus**     | (LGTM+)    | Zbieranie metryk     | Zbiera metryki w czasie rzeczywistym (TSDB)                    | Monitorowanie aplikacji i systemu | Grafana, Alertmanager             | Pull-based, niskie zużycie       |
+| **Alertmanager**   | (LGTM+)    | Alerty               | Obsługuje alerty z Prometheusa, wysyła powiadomienia           | Slack, e-mail, webhooki           | Prometheus                        | Deklaratywne reguły alertów      |
+| **Elasticsearch**  | ELK        | Baza logów / wyszukiwarka | Przechowuje logi, umożliwia ich zaawansowane przeszukiwanie | Zbieranie i analiza logów         | Logstash, Filebeat, Kibana        | Wysokie wymagania sprzętowe      |
+| **Logstash**       | ELK        | Procesor logów       | Przetwarza i filtruje logi                                     | Transformacje logów przed ES      | Elasticsearch                     | Elastyczny, ale ciężki            |
+| **Filebeat**       | ELK        | Agent logów          | Wysyła logi z plików (np. `/var/log`)                          | Zbieranie z maszyn fizycznych     | Elasticsearch, Logstash           | Bardzo lekki                      |
+| **Kibana**         | ELK        | Frontend (GUI)       | Przeglądanie i wizualizacja logów w Elasticsearch              | Dashboardy i analiza              | Elasticsearch                     | Szybki, ale tylko do ES           |
+| **Fluentd**        | Uniwersalny| Agregator logów      | Odczytuje, filtruje i przesyła logi do różnych backendów       | Łączenie różnych źródeł logów     | Elasticsearch, Loki, Kafka, S3    | Bardzo elastyczny i rozbudowany  |
+| **Fluent Bit**     | Uniwersalny| Lekki agregator logów| Lżejsza wersja Fluentd, idealna dla K8s                         | Szybkie forwardowanie logów       | Elasticsearch, Loki               | Szybszy, mniej pluginów           |
+| **Jaeger**         | Tracing    | System śledzenia     | Zbieranie i wyświetlanie śladów zapytań                        | Diagnostyka mikroserwisów         | OpenTelemetry, Grafana            | Popularny, starszy niż Tempo      |
+| **OpenTelemetry**  | Agregator  | Specyfikacja + SDK   | Standaryzowane zbieranie logów, metryk, śladów                 | Uniwersalne API                   | Prometheus, Tempo, Jaeger         | Nowoczesny standard               |
+
+---
+
+## 🧠 Co do czego służy? TL;DR
+
+- **Prometheus** – metryki (CPU, RAM, HTTP statusy, latency)
+- **Loki** – logi z kontenerów (stdout/stderr)
+- **Tempo / Jaeger** – śledzenie zapytań między usługami (tracing)
+- **Grafana** – wizualizacja wszystkiego powyżej
+- **Alertmanager** – wysyłanie alertów na podstawie reguł Prometheusa
+- **Fluentd / Fluent Bit** – zbieranie logów z różnych źródeł i wysyłanie dalej
+- **Elasticsearch + Kibana** – mocna analiza logów, przeszukiwanie, dashboardy
+- **Logstash** – obróbka logów (parsowanie, wzbogacanie)
+- **Filebeat** – zbieranie logów z plików
+
+---
+
+## 📐 Diagram: Typowe architektury
+
+### LGTM (Lightweight):
+
+```
+[Containers] → [Promtail] → [Loki] → [Grafana]
+                            ↑
+           [Prometheus] ----|
+                            |
+           [Tempo (trace)]--|
+```
+
+### ELK:
+
+```
+[Containers / Logs] → [Filebeat] → [Logstash] → [Elasticsearch] → [Kibana]
+```
+
+### Z Fluentd:
+
+```
+[Containers / Logs] → [Fluentd]
+     ├──> Elasticsearch
+     ├──> Loki
+     └──> S3 / Kafka / Tempo
+```
+
+---
+
+## ✅ Wybór zależnie od potrzeb:
+
+| Potrzeba                          | Najlepsze narzędzie     |
+|----------------------------------|--------------------------|
+| Prosty monitoring i logi w K8s   | LGTM (Prometheus + Loki) |
+| Zaawansowana analiza logów       | ELK                      |
+| Routing i przekształcanie logów  | Fluentd                  |
+| Minimalistyczne podejście        | Fluent Bit + Loki        |
+| SaaS i chmura                    | Datadog, New Relic, Grafana Cloud |

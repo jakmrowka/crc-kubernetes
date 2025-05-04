@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-warzywniak-headless
+  namespace: student0
+spec:
+  clusterIP: None
+  selector:
+    app: warzywniak-stateful
+  ports:
+  - name: insert
+    port: 8000
+    targetPort: 8000
+  - name: list
+    port: 8001
+    targetPort: 8001
