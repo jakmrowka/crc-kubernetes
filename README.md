@@ -1,63 +1,103 @@
+# 📘 Kubernetes – Materiały uzupełniające do kursu CRC
+
+Ten dokument zawiera praktyczne przykłady i opisy różnych zasobów w Kubernetes, omawiane na kursie CRC.
+Każdy przykład posiada adnotacje wyjaśniające kontekst i zastosowanie, co ma pomóc w lepszym zrozumieniu praktyki.
+
 # Wstęp 
 Poniższe przykłady są uzupełnieniem materiałów do kursu w ramach CRC.
-Są one przykładami do omawiania tworzenia różnych zasobów na kuberenetesie.
+Są one przykładami do omawiania tworzenia różnych zasobów na Kubernetesie.
+Każdy przykład odzwierciedla inny typ zasobu lub scenariusz, który może wystąpić w środowisku produkcyjnym.
 
 # Intro
-## Pod najbardziej podstawowa jednostka
+## Pod – najbardziej podstawowa jednostka w Kubernetesie
+Pod to najmniejsza i podstawowa jednostka wykonawcza w K8s. Może zawierać jeden lub więcej kontenerów działających razem.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\pod.yaml 
 ```
-## ReplicationController(old)
+
+## ReplicationController (stare podejście do replikacji)
+Nie jest już zalecane – zastąpione przez ReplicaSet, ale warto znać.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\ReplicaController.yaml 
 ```
-## ReplicaSet
+
+## ReplicaSet – nowoczesne podejście do replikacji
+Zapewnia określoną liczbę działających kopii tego samego poda.
+
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\ReplicaSet.yaml 
 ```
 
-### Zmiana z pliku yaml
+### Zmiana z pliku YAML
+Służy do nadpisania istniejącej definicji.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml replace -f .\intro\ReplicaSet.yaml 
 ```
-### scalling z pliku
+
+### Skalowanie z pliku
+Zmienia ilość replik na podstawie pliku.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml scale --replicas=4 -f .\intro\ReplicaSet.yaml 
 ```
-### Scalling z nazwy
+
+### Skalowanie po nazwie zasobu
+Skalowanie po nazwie bez potrzeby używania pliku.
+
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml scale --replicas=3 replicaset simple-nginx-rs
 ```
-## Deployment
+
+## Deployment – preferowany sposób rolloutu aplikacji
+Deployment zarządza ReplicaSetami i zapewnia możliwość rolloutu i rollbacku.
+
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\Deployment.yaml 
 ```
-### Zmiana deploymentu z pliku
+
+### Zmiana deploymentu z pliku YAML
+Zastępuje istniejący Deployment jego nową wersją.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml replace -f .\intro\Deployment.yaml 
 ```
-### Poprzednia replika
+
+### Cofnięcie do poprzedniej wersji
+Przydatne przy błędnym wdrożeniu.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml rollout undo deployment/simple-nginx-deployment
 ```
-### Historia Rolloutów
+
+### Historia rolloutów
+Pozwala prześledzić poprzednie wersje rolloutów.
+
 ```bash
  kubectl --kubeconfig=.\student0-kubeconfig.yaml rollout history deployment/simple-nginx-deployment
 ```
 
-## Service
+## Service – ekspozycja aplikacji
+Tworzymy różne typy usług w celu udostępnienia poda.
+
+### NodePort – udostępnienie na zewnątrz przez port węzła
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\NodePort-svc.yaml 
 ```
 
+### ClusterIP – domyślna usługa dostępna tylko w klastrze
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\ClusterIP-svc.yaml 
 ```
 
+### LoadBalancer – działa tylko w chmurze lub z MetalLB
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\LB-svc.yaml 
 ```
 
+### Ingress – HTTP/HTTPS gateway
 ```bash
 kubectl --kubeconfig=.\student0-kubeconfig.yaml apply -f .\intro\Ingress.yaml 
 ```
@@ -189,7 +229,7 @@ helm upgrade viewer ./helm/helm-secret-viewer --kubeconfig=./student0-kubeconfig
 ```
 
 # Cron
-```bash
+```bash[kubernetes_kurs_crc_materialy.md](..%2F..%2FDownloads%2Fkubernetes_kurs_crc_materialy.md)
 kubectl apply -f ./crony/cron.yaml --kubeconfig=./student0-kubeconfig.yaml
 ```
 
