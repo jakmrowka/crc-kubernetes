@@ -6,7 +6,7 @@ data:
   default.conf: |
     server {
       listen 80;
-      server_name crc1.com;
+      server_name crc1.com www.crc1.com;
 
       root /usr/share/nginx/html/crc1;
       index index.html;
