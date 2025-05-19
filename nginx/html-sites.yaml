@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: html-pages
+data:
+  crc1-index.html: |
+    <h1>Strona CRC1.COM</h1>
+    <a href="kontakt.html">Kontakt</a>
+
+  crc1-kontakt.html: |
+    <h1>Kontakt CRC1.COM</h1>
+    <p>Email: kontakt@crc1.com</p>
+
+  crc1-404.html: |
+    <h1>Błąd 404 - CRC1.COM</h1>
+    <p>Strona o podanym adresie nie istnieje!</p>
+
+  crc2-index.html: |
+    <h1>Strona CRC2.COM</h1>
