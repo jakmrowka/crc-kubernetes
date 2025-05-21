@@ -309,3 +309,6 @@ kubectl apply -f ./crony/cron.yaml --kubeconfig=./student0-kubeconfig.yaml
 | Routing i przekształcanie logów  | Fluentd                  |
 | Minimalistyczne podejście        | Fluent Bit + Loki        |
 | SaaS i chmura                    | Datadog, New Relic, Grafana Cloud |
+
+
+

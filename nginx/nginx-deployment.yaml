@@ -20,7 +20,6 @@ spec:
         volumeMounts:
         - name: nginx-config
           mountPath: /etc/nginx/conf.d/default.conf
-          subPath: default.conf
         - name: crc1-html
           mountPath: /usr/share/nginx/html/crc1
         - name: crc2-html
@@ -52,3 +51,31 @@ spec:
             items:
               - key: crc2-index.html
                 path: index.html
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crc4-flask
+  namespace: student0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crc4-flask
+  template:
+    metadata:
+      labels:
+        app: crc4-flask
+    spec:
+      containers:
+      - name: crc4-flask
+        image: gadzina13/crc4-flask:v1
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+          requests:
+            cpu: "50m"
+            memory: "64Mi"

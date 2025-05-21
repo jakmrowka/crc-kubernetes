@@ -32,3 +32,24 @@ data:
           try_files $uri $uri/ =404;
       }
     }
+    
+    # crc3.com redirect
+    server {
+      listen 80;
+      server_name crc3.com;
+      return 301 https://crc2.com$request_uri;
+    }
+    
+    # crc4.com - Flask przez reverse proxy
+    server {
+      listen 80;
+      server_name crc4.com;
+
+      location / {
+          proxy_pass http://crc4-flask-service.student0.svc.cluster.local:80;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    }
